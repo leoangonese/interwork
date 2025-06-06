@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:swipe_cards/swipe_cards.dart';
+import './chat_list.dart';
+import './like_list.dart';
 
 List<Map<String, String>> vagasMock = [
   {
-    'banner': 'https://blog.emania.com.br/wp-content/uploads/2016/02/direitos-autorais-e-de-imagem.jpg',
-    'foto': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTCbVVhxA-HjtuVFPredX_fSg0jT-dL9BJxAw&s',
+    'banner':
+        'https://blog.emania.com.br/wp-content/uploads/2016/02/direitos-autorais-e-de-imagem.jpg',
+    'foto':
+        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTCbVVhxA-HjtuVFPredX_fSg0jT-dL9BJxAw&s',
     'titulo': 'Desenvolvedor Flutter',
     'setor': 'Tecnologia',
     'localizacao': 'São Paulo - SP',
-    'descricao': 'Desenvolvimento de aplicativos mobile com Flutter e Dart. Ambiente ágil.',
+    'descricao':
+        'Desenvolvimento de aplicativos mobile com Flutter e Dart. Ambiente ágil.',
   },
   {
     'banner': 'https://via.placeholder.com/400x150',
@@ -16,7 +21,8 @@ List<Map<String, String>> vagasMock = [
     'titulo': 'Desenvolvedor Flutter',
     'setor': 'Tecnologia',
     'localizacao': 'São Paulo - SP',
-    'descricao': 'Desenvolvimento de aplicativos mobile com Flutter e Dart. Ambiente ágil.',
+    'descricao':
+        'Desenvolvimento de aplicativos mobile com Flutter e Dart. Ambiente ágil.',
   },
 ];
 
@@ -28,14 +34,16 @@ List<Map<String, String>> candidatosMock = [
     'setor': 'Tecnologia',
     'localizacao': 'Rio de Janeiro - RJ',
     'funcao': 'Desenvolvedor Fullstack',
-    'descricao': 'Experiência em Flutter, Node.js e React. Apaixonado por resolver problemas.',
+    'descricao':
+        'Experiência em Flutter, Node.js e React. Apaixonado por resolver problemas.',
   },
 ];
 
 class SwipeProfileScreen extends StatefulWidget {
   final bool isCandidato;
 
-  const SwipeProfileScreen({Key? key, required this.isCandidato}) : super(key: key);
+  const SwipeProfileScreen({Key? key, required this.isCandidato})
+    : super(key: key);
 
   @override
   _SwipeProfileScreenState createState() => _SwipeProfileScreenState();
@@ -45,38 +53,101 @@ class _SwipeProfileScreenState extends State<SwipeProfileScreen> {
   late MatchEngine _matchEngine;
   List<SwipeItem> _swipeItems = [];
 
-  int _selectedIndex = 0; // para controlar o menu inferior (mesmo que não faça nada por enquanto)
+  int _selectedIndex =
+      0; // para controlar o menu inferior (mesmo que não faça nada por enquanto)
 
   @override
   void initState() {
     super.initState();
 
-    List<Map<String, String>> mockData = widget.isCandidato ? vagasMock : candidatosMock;
+    List<Map<String, String>> mockData =
+        widget.isCandidato ? vagasMock : candidatosMock;
 
-    _swipeItems = mockData.map((data) {
-      return SwipeItem(
-        content: data,
-        likeAction: () {
-          print("Like: ${data['nome'] ?? data['titulo']}");
-        },
-        nopeAction: () {
-          print("Nope: ${data['nome'] ?? data['titulo']}");
-        },
-        superlikeAction: () {
-          print("SuperLike: ${data['nome'] ?? data['titulo']}");
-        },
-      );
-    }).toList();
+    _swipeItems =
+        mockData.map((data) {
+          return SwipeItem(
+            content: data,
+            likeAction: () {
+              final nomeOuTitulo = data['nome'] ?? data['titulo'];
+              print("Like: $nomeOuTitulo");
+
+              _mostrarPopupMatch(nomeOuTitulo ?? '');
+            },
+
+            nopeAction: () {
+              print("Nope: ${data['nome'] ?? data['titulo']}");
+            },
+            superlikeAction: () {
+              print("SuperLike: ${data['nome'] ?? data['titulo']}");
+            },
+          );
+        }).toList();
 
     _matchEngine = MatchEngine(swipeItems: _swipeItems);
   }
 
+  void _mostrarPopupMatch(String nomeOuTitulo) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: const Text(
+            "🎉 É um Match!",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: Text("Você e $nomeOuTitulo curtiram um ao outro."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("Voltar"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => ConversationsListScreen()),
+                );
+              },
+              child: const Text("Ir para o chat"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _onItemTapped(int index) {
+    if (index == _selectedIndex) return;
+
     setState(() {
       _selectedIndex = index;
     });
-    // Aqui você pode implementar a navegação para as outras telas.
-    print('Menu selecionado: $index');
+
+    // Defina a navegação com base no índice
+    switch (index) {
+      case 1:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const SwipeInteressesScreen(isCandidato: true),
+          ),
+        );
+
+        break;
+      case 2:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => ConversationsListScreen()),
+        );
+
+        break;
+    }
   }
 
   @override
@@ -100,7 +171,9 @@ class _SwipeProfileScreenState extends State<SwipeProfileScreen> {
             },
             onStackFinished: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Você visualizou todas as opções!")),
+                const SnackBar(
+                  content: Text("Você visualizou todas as opções!"),
+                ),
               );
             },
             itemChanged: (SwipeItem item, int index) {
@@ -146,15 +219,17 @@ class _SwipeProfileScreenState extends State<SwipeProfileScreen> {
                   return Container(
                     color: Colors.grey[300],
                     child: const Center(
-                      child: Icon(Icons.broken_image, size: 50, color: Colors.grey),
+                      child: Icon(
+                        Icons.broken_image,
+                        size: 50,
+                        color: Colors.grey,
+                      ),
                     ),
                   );
                 },
               ),
               // Overlay leve para contraste
-              Container(
-                color: Colors.black.withOpacity(0.3),
-              ),
+              Container(color: Colors.black.withOpacity(0.3)),
             ],
           ),
         ),
@@ -184,7 +259,11 @@ class _SwipeProfileScreenState extends State<SwipeProfileScreen> {
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                       shadows: [
-                        Shadow(blurRadius: 4, color: Colors.black54, offset: Offset(1, 1)),
+                        Shadow(
+                          blurRadius: 4,
+                          color: Colors.black54,
+                          offset: Offset(1, 1),
+                        ),
                       ],
                     ),
                     textAlign: TextAlign.center,
@@ -197,7 +276,11 @@ class _SwipeProfileScreenState extends State<SwipeProfileScreen> {
                       color: Color(0xFFC73AFF),
                       fontWeight: FontWeight.w600,
                       shadows: [
-                        Shadow(blurRadius: 3, color: Colors.black45, offset: Offset(1, 1)),
+                        Shadow(
+                          blurRadius: 3,
+                          color: Colors.black45,
+                          offset: Offset(1, 1),
+                        ),
                       ],
                     ),
                     textAlign: TextAlign.center,
@@ -209,20 +292,30 @@ class _SwipeProfileScreenState extends State<SwipeProfileScreen> {
                       color: Colors.white70,
                       fontWeight: FontWeight.w400,
                       shadows: [
-                        Shadow(blurRadius: 3, color: Colors.black45, offset: Offset(1, 1)),
+                        Shadow(
+                          blurRadius: 3,
+                          color: Colors.black45,
+                          offset: Offset(1, 1),
+                        ),
                       ],
                     ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    widget.isCandidato ? (data['titulo'] ?? '') : (data['funcao'] ?? ''),
+                    widget.isCandidato
+                        ? (data['titulo'] ?? '')
+                        : (data['funcao'] ?? ''),
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w600,
                       color: Colors.white,
                       shadows: [
-                        Shadow(blurRadius: 3, color: Colors.black54, offset: Offset(1, 1)),
+                        Shadow(
+                          blurRadius: 3,
+                          color: Colors.black54,
+                          offset: Offset(1, 1),
+                        ),
                       ],
                     ),
                     textAlign: TextAlign.center,
@@ -237,7 +330,11 @@ class _SwipeProfileScreenState extends State<SwipeProfileScreen> {
                         color: Colors.white70,
                         height: 1.4,
                         shadows: [
-                          Shadow(blurRadius: 3, color: Colors.black38, offset: Offset(1, 1)),
+                          Shadow(
+                            blurRadius: 3,
+                            color: Colors.black38,
+                            offset: Offset(1, 1),
+                          ),
                         ],
                       ),
                       textAlign: TextAlign.center,
