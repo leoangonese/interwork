@@ -23,8 +23,8 @@ class LoginScreen extends StatelessWidget {
             // Logo
             Image.asset(
               'assets/images/logo.png',
-               width: 250,
-               color: Colors.white,
+              width: 250,
+              color: Colors.white,
             ),
 
             const SizedBox(height: 32),
@@ -40,68 +40,66 @@ class LoginScreen extends StatelessWidget {
             const SizedBox(height: 24),
 
             // Linha separadora
-            Container(
-              height: 1,
-              color: Colors.white,
-              width: double.infinity,
-            ),
+            Container(height: 1, color: Colors.white, width: double.infinity),
 
             const SizedBox(height: 24),
 
             // Botão Entrar
-SizedBox(
-  width: double.infinity,
-  child: ElevatedButton(
-    style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(32),
-      ),
-      padding: const EdgeInsets.symmetric(vertical: 16),
-    ),
-    onPressed: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const SwipeProfileScreen(isCandidato: true),
-        ),
-      );
-    },
-    child: const Text(
-      'Entrar',
-      style: TextStyle(
-        color: Color(0xFF3943FF),
-        fontWeight: FontWeight.bold,
-        fontSize: 16,
-      ),
-    ),
-  ),
-),
-
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(32),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (_) => const SwipeProfileScreen(isCandidato: true),
+                    ),
+                  );
+                },
+                child: const Text(
+                  'Entrar',
+                  style: TextStyle(
+                    color: Color(0xFF3943FF),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
 
             const SizedBox(height: 24),
 
             // Links
-Row(
-  mainAxisAlignment: MainAxisAlignment.center,
-  children: [
-    TextButton(
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const RegisterStepOne()),
-        );
-      },
-      child: const Text(
-        'NÃO POSSUI CADASTRO?',
-        style: TextStyle(
-          color: Colors.white,
-          decoration: TextDecoration.underline,
-        ),
-      ),
-    ),
-  ],
-),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const RegisterStepOne(),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    'NÃO POSSUI CADASTRO?',
+                    style: TextStyle(
+                      color: Colors.white,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+              ],
+            ),
 
             const SizedBox(height: 12),
             const Text(
@@ -130,7 +128,10 @@ Row(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide.none,
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
       ),
     );
   }

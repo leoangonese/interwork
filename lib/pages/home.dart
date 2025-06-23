@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:interwork_app/pages/match.dart';
 import 'package:swipe_cards/swipe_cards.dart';
 import './chat_list.dart';
 import './like_list.dart';
@@ -60,6 +61,7 @@ class _SwipeProfileScreenState extends State<SwipeProfileScreen> {
   void initState() {
     super.initState();
 
+    Set<String> likesIds = {};
     List<Map<String, String>> mockData =
         widget.isCandidato ? vagasMock : candidatosMock;
 
@@ -68,10 +70,28 @@ class _SwipeProfileScreenState extends State<SwipeProfileScreen> {
           return SwipeItem(
             content: data,
             likeAction: () {
-              final nomeOuTitulo = data['nome'] ?? data['titulo'];
-              print("Like: $nomeOuTitulo");
+              final id = data['nome'] ?? data['titulo'];
 
-              _mostrarPopupMatch(nomeOuTitulo ?? '');
+              setState(() {
+                likesIds.add(id ?? "");
+              });
+              showMatchPopup(
+                context: context,
+                nomeOutroUsuario: id ?? "",
+                imageUrlEmpresa:
+                    'https://images.unsplash.com/photo-1719253480609-579ad1622c65?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+                imageUrlPessoa:
+                    'https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+                onChatPressed: () {
+                  // Navegue para a tela de chat aqui
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ConversationsListScreen(),
+                    ),
+                  );
+                },
+              );
             },
 
             nopeAction: () {
@@ -84,42 +104,6 @@ class _SwipeProfileScreenState extends State<SwipeProfileScreen> {
         }).toList();
 
     _matchEngine = MatchEngine(swipeItems: _swipeItems);
-  }
-
-  void _mostrarPopupMatch(String nomeOuTitulo) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: const Text(
-            "🎉 É um Match!",
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          content: Text("Você e $nomeOuTitulo curtiram um ao outro."),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text("Voltar"),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => ConversationsListScreen()),
-                );
-              },
-              child: const Text("Ir para o chat"),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   void _onItemTapped(int index) {
