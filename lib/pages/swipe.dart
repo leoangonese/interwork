@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:interwork_app/widgets/bottom_nav_layout.dart';
+import 'package:interwork_app/widgets/main_layout.dart';
 import 'package:swipe_cards/swipe_cards.dart';
 import '../mock/vagas.dart';
 import '../mock/candidatos.dart';
+import '../mock/likes_candidatos.dart';
+import '../mock/likes_recrutadores.dart';
 import './chat_list.dart';
 import './like_list.dart';
 import './match.dart'; // ajuste se necessário
@@ -20,48 +22,73 @@ class SwipeProfileScreen extends StatefulWidget {
 class _SwipeProfileScreenState extends State<SwipeProfileScreen> {
   late MatchEngine _matchEngine;
   List<SwipeItem> _swipeItems = [];
-  int _selectedIndex = 0;
   int _currentIndex = 0;
+
+  // Mantém os IDs vistos durante a sessão
+  static final Set<String> idsVistos = {};
 
   @override
   void initState() {
     super.initState();
 
-    Set<String> likesIds = {};
-    List<Map<String, String>> mockData =
-        widget.isCandidato ? vagasMock : candidatosMock;
+    final mockData = widget.isCandidato ? vagasMock : candidatosMock;
+
+    final naoVistos =
+        mockData.where((data) {
+          final id = data['id'];
+          return id != null && !idsVistos.contains(id);
+        }).toList();
 
     _swipeItems =
-        mockData.map((data) {
+        naoVistos.map((data) {
           return SwipeItem(
             content: data,
             likeAction: () {
-              final id = data['nome'] ?? data['titulo'];
+              final id = data['id'] ?? '';
+              idsVistos.add(id);
 
               setState(() {
-                likesIds.add(id ?? "");
+                if (widget.isCandidato) {
+                  likesFeitosPeloCandidato.add(id);
+                } else {
+                  likesFeitosPeloRecrutador.add(id);
+                }
               });
-              showMatchPopup(
-                context: context,
-                nomeOutroUsuario: id ?? "",
-                imageUrlEmpresa: data['foto'] ?? '',
-                imageUrlPessoa:
-                    'https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-                onChatPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ConversationsListScreen(),
-                    ),
-                  );
-                },
-              );
+
+              final houveMatch =
+                  widget.isCandidato
+                      ? likesRecebidosCandidatos.contains(id)
+                      : likesRecebidosRecrutadores.contains(id);
+
+              if (houveMatch) {
+                showMatchPopup(
+                  context: context,
+                  nomeOutroUsuario: data['nome'] ?? data['titulo'] ?? "",
+                  imageUrlEmpresa: data['foto'] ?? '',
+                  imageUrlPessoa:
+                      'https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+                  onChatPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ConversationsListScreen(),
+                      ),
+                    );
+                  },
+                );
+              } else {
+                print("Like enviado para $id. Ainda sem reciprocidade.");
+              }
             },
             nopeAction: () {
-              print("Nope: \${data['nome'] ?? data['titulo']}");
+              final id = data['id'] ?? '';
+              idsVistos.add(id);
+              print("Nope: ${data['nome'] ?? data['titulo']}");
             },
             superlikeAction: () {
-              print("SuperLike: \${data['nome'] ?? data['titulo']}");
+              final id = data['id'] ?? '';
+              idsVistos.add(id);
+              print("SuperLike: ${data['nome'] ?? data['titulo']}");
             },
           );
         }).toList();
@@ -127,7 +154,7 @@ class _SwipeProfileScreenState extends State<SwipeProfileScreen> {
             SizedBox(
               width: double.infinity,
               height: media.height * 0.4,
-              child: Image.network(
+              child: Image.asset(
                 data['banner'] ?? '',
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
@@ -154,7 +181,7 @@ class _SwipeProfileScreenState extends State<SwipeProfileScreen> {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, Color(0xFFC73AFF)],
+                    colors: [Colors.transparent, Color(0xFF853EFF)],
                   ),
                 ),
               ),
@@ -175,7 +202,7 @@ class _SwipeProfileScreenState extends State<SwipeProfileScreen> {
                     child: CircleAvatar(
                       radius: 50,
                       backgroundColor: const Color.fromARGB(255, 73, 6, 102),
-                      backgroundImage: NetworkImage(data['foto'] ?? ''),
+                      backgroundImage: AssetImage(data['foto'] ?? ''),
                     ),
                   ),
                   const SizedBox(height: 12),

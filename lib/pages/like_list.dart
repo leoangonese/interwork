@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:interwork_app/widgets/bottom_nav_layout.dart';
+import 'package:interwork_app/widgets/main_layout.dart';
+import '../mock/vagas.dart';
+import '../mock/candidatos.dart';
+import '../mock/likes_candidatos.dart';
+import '../mock/likes_recrutadores.dart';
 
 class SwipeInteressesScreen extends StatefulWidget {
   final bool isCandidato;
@@ -18,67 +22,23 @@ class _SwipeInteressesScreenState extends State<SwipeInteressesScreen> {
   void initState() {
     super.initState();
 
-    if (widget.isCandidato) {
-      interesses = [
-        {
-          'nome': 'Empresa A',
-          'setor': 'Tecnologia - SP',
-          'descricao': 'Procuramos desenvolvedores Flutter.',
-          'foto': 'https://randomuser.me/api/portraits/men/45.jpg',
-        },
-        {
-          'nome': 'Empresa B',
-          'setor': 'Marketing - RJ',
-          'descricao': 'Vaga para analista de marketing.',
-          'foto': 'https://randomuser.me/api/portraits/men/46.jpg',
-        },
-        {
-          'nome': 'Empresa C',
-          'setor': 'Finanças - RJ',
-          'descricao': 'Vaga para analista financeiro.',
-          'foto': 'https://randomuser.me/api/portraits/men/48.jpg',
-        },
-        {
-          'nome': 'Empresa D',
-          'setor': 'RH - SP',
-          'descricao': 'Vaga para assistente de RH.',
-          'foto': 'https://randomuser.me/api/portraits/women/45.jpg',
-        },
-      ];
-    } else {
-      interesses = [
-        {
-          'nome': 'Maria Silva',
-          'setor': 'Designer - BH',
-          'descricao': 'Profissional criativa e dedicada.',
-          'foto': 'https://randomuser.me/api/portraits/women/44.jpg',
-        },
-        {
-          'nome': 'Carlos Souza',
-          'setor': 'Desenvolvedor - SP',
-          'descricao': 'Especialista em mobile e web.',
-          'foto': 'https://randomuser.me/api/portraits/men/47.jpg',
-        },
-        {
-          'nome': 'Ana Pereira',
-          'setor': 'Marketing - RJ',
-          'descricao': 'Especialista em campanhas digitais.',
-          'foto': 'https://randomuser.me/api/portraits/women/46.jpg',
-        },
-        {
-          'nome': 'João Lima',
-          'setor': 'Engenheiro - MG',
-          'descricao': 'Engenheiro civil com 10 anos de experiência.',
-          'foto': 'https://randomuser.me/api/portraits/men/49.jpg',
-        },
-      ];
-    }
+    final todasAsOpcoes = widget.isCandidato ? vagasMock : candidatosMock;
+    final likesRecebidos =
+        widget.isCandidato
+            ? likesRecebidosCandidatos
+            : likesRecebidosRecrutadores;
+
+    // Apenas perfis que curtiram o usuário atual
+    interesses =
+        todasAsOpcoes
+            .where((item) => likesRecebidos.contains(item['id']))
+            .toList();
   }
 
   @override
   Widget build(BuildContext context) {
     return BottomNavLayout(
-      currentIndex: 1, // posição do menu de "curtidas"
+      currentIndex: 1,
       isCandidato: widget.isCandidato,
       child: Container(
         decoration: const BoxDecoration(
@@ -97,7 +57,7 @@ class _SwipeInteressesScreenState extends State<SwipeInteressesScreen> {
                     ? 'Vagas que curtiram você'
                     : 'Candidatos interessados',
                 style: const TextStyle(
-                  fontSize: 20,
+                  fontSize: 22,
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                 ),
@@ -108,28 +68,24 @@ class _SwipeInteressesScreenState extends State<SwipeInteressesScreen> {
                     interesses.isEmpty
                         ? const Center(
                           child: Text(
-                            'Sem mais perfis no momento.',
+                            'Sem interesses no momento.',
                             style: TextStyle(
                               fontSize: 18,
                               color: Colors.white70,
                             ),
                           ),
                         )
-                        : Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                          child: GridView.builder(
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  mainAxisSpacing: 12,
-                                  crossAxisSpacing: 12,
-                                  childAspectRatio: 0.75,
-                                ),
-                            itemCount: interesses.length,
-                            itemBuilder: (context, index) {
-                              return _buildCard(interesses[index]);
-                            },
+                        : ListView.separated(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 10,
                           ),
+                          itemCount: interesses.length,
+                          separatorBuilder:
+                              (_, __) => const SizedBox(height: 16),
+                          itemBuilder: (context, index) {
+                            return _buildCard(interesses[index]);
+                          },
                         ),
               ),
             ],
@@ -139,41 +95,67 @@ class _SwipeInteressesScreenState extends State<SwipeInteressesScreen> {
     );
   }
 
-  Widget _buildCard(Map<String, String> interesse) {
+  Widget _buildCard(Map<String, String> item) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF9C27B0).withOpacity(0.8),
+        color: Colors.white.withOpacity(0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          CircleAvatar(
-            backgroundImage: NetworkImage(interesse['foto']!),
-            radius: 40,
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 30,
+                backgroundImage: AssetImage(item['foto'] ?? ''),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item['nome'] ?? item['titulo'] ?? '',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.business_center,
+                          size: 16,
+                          color: Colors.white70,
+                        ),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            item['setor'] ?? '',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
           Text(
-            interesse['nome']!,
+            item['descricao'] ?? '',
             style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
+              fontSize: 14,
               color: Colors.white,
+              height: 1.4,
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 6),
-          Text(
-            interesse['setor']!,
-            style: const TextStyle(color: Colors.white70),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            interesse['descricao']!,
-            style: const TextStyle(color: Colors.white),
-            textAlign: TextAlign.center,
           ),
         ],
       ),

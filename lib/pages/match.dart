@@ -71,7 +71,7 @@ void showMatchPopup({
                 children: [
                   // Imagem da empresa
                   CircleAvatar(
-                    backgroundImage: NetworkImage(imageUrlEmpresa),
+                    backgroundImage: AssetImage(imageUrlEmpresa),
                     radius: 50,
                     backgroundColor: Colors.white,
                   ),
@@ -80,7 +80,7 @@ void showMatchPopup({
                     right: -40, // deslocamento lateral
                     bottom: -10, // leve sobreposição inferior
                     child: CircleAvatar(
-                      backgroundImage: NetworkImage(imageUrlPessoa),
+                      backgroundImage: AssetImage(imageUrlPessoa),
                       radius: 36,
                       backgroundColor: Colors.white,
                     ),
