@@ -14,10 +14,7 @@ class InterworkApp extends StatelessWidget {
     return MaterialApp(
       title: 'Interwork Registro',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.purple,
-        fontFamily: 'Roboto',
-      ),
+      theme: ThemeData(primarySwatch: Colors.purple, fontFamily: 'Roboto'),
       home: const SplashScreen(),
     );
   }
@@ -57,11 +54,7 @@ class _SplashScreenState extends State<SplashScreen> {
           ),
         ),
         child: Center(
-  child: Image.asset(
-        'assets/images/logo.png',
-        width: 250,
-        height: 250,
-      ),
+          child: Image.asset('assets/images/logo.png', width: 250, height: 250),
         ),
       ),
     );

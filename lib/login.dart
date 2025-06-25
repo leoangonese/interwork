@@ -1,9 +1,52 @@
 import 'package:flutter/material.dart';
-import 'register_step_one.dart'; // ou o caminho correto para a sua tela
-import './pages/home.dart';
+import 'register_step_one.dart';
+import './pages/swipe.dart';
+import './mock/usuarios.dart'; // <-- importar os mockados
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController senhaController = TextEditingController();
+
+  String? errorText;
+
+  void _login() {
+    final email = emailController.text.trim();
+    final senha = senhaController.text;
+
+    if (email.isEmpty || senha.isEmpty) {
+      setState(() {
+        errorText = 'Por favor, preencha todos os campos.';
+      });
+      return;
+    }
+
+    final user = mockUsers.firstWhere(
+      (u) => u['email'] == email && u['senha'] == senha,
+      orElse: () => {},
+    );
+
+    if (user.isNotEmpty) {
+      final isCandidato = user['tipo'] == 'candidato';
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => SwipeProfileScreen(isCandidato: isCandidato),
+        ),
+      );
+    } else {
+      setState(() {
+        errorText = 'Email ou senha inválidos.';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +63,6 @@ class LoginScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Logo
             Image.asset(
               'assets/images/logo.png',
               width: 250,
@@ -29,22 +71,25 @@ class LoginScreen extends StatelessWidget {
 
             const SizedBox(height: 32),
 
-            // Campo Email
-            _buildInputField(label: 'Email: *'),
+            _buildInputField(label: 'Email: *', controller: emailController),
 
             const SizedBox(height: 16),
 
-            // Campo Senha
-            _buildInputField(label: 'Senha: *', obscureText: true),
+            _buildInputField(
+              label: 'Senha: *',
+              controller: senhaController,
+              obscureText: true,
+            ),
+
+            const SizedBox(height: 16),
+
+            if (errorText != null)
+              Text(errorText!, style: const TextStyle(color: Colors.redAccent)),
 
             const SizedBox(height: 24),
-
-            // Linha separadora
             Container(height: 1, color: Colors.white, width: double.infinity),
-
             const SizedBox(height: 24),
 
-            // Botão Entrar
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -55,15 +100,7 @@ class LoginScreen extends StatelessWidget {
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (_) => const SwipeProfileScreen(isCandidato: true),
-                    ),
-                  );
-                },
+                onPressed: _login,
                 child: const Text(
                   'Entrar',
                   style: TextStyle(
@@ -77,7 +114,6 @@ class LoginScreen extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            // Links
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -115,8 +151,13 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInputField({required String label, bool obscureText = false}) {
+  Widget _buildInputField({
+    required String label,
+    required TextEditingController controller,
+    bool obscureText = false,
+  }) {
     return TextField(
+      controller: controller,
       obscureText: obscureText,
       style: const TextStyle(color: Colors.black),
       decoration: InputDecoration(
